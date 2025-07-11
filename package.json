@@ -11,13 +11,14 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0",
-    "framer-motion": "^7.0.0",
-    "lucide-react": "^0.290.0",
-    "@shadcn/ui": "^1.0.0"
-  },
+  "react": "^18.0.0",
+  "react-dom": "^18.0.0",
+  "react-router-dom": "^6.0.0",
+  "framer-motion": "^7.0.0",
+  "lucide-react": "^0.290.0"
+  // "@shadcn/ui" removed
+},
+
   "devDependencies": {
     "vite": "^4.0.0",
     "@vitejs/plugin-react": "^3.0.0",
