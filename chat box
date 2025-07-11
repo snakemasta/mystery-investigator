@@ -1,0 +1,225 @@
+/*
+Mystery Investigator Game (with Chat)
+A React/Tailwind web application where players explore cases, examine clues, interview suspects, and solve mysteries via a chat interface.
+
+New Feature: ChatBox where users can ask questions about the current case.
+*/
+
+// src/index.jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './styles/index.css';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+
+// src/App.jsx
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import CaseList from './components/CaseList';
+import CaseDetail from './components/CaseDetail';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <main className="p-4">
+        <Routes>
+          <Route path="/" element={<CaseList />} />
+          <Route path="/case/:id" element={<CaseDetail />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+// src/data/cases.js
+export const cases = [
+  {
+    id: '1',
+    title: 'The Disappearing Artifact',
+    description: 'A priceless relic vanishes from the museum floor.',
+    clues: [
+      { id: 'c1', title: 'Security Footage', image: '/clues/footage.jpg' },
+      { id: 'c2', title: 'Fiber Sample', image: '/clues/fiber.jpg' },
+    ],
+    suspects: [
+      { id: 's1', name: 'Dr. Ellis', role: 'Curator' },
+      { id: 's2', name: 'Morgan', role: 'Janitor' },
+    ],
+    solution: 'The artifact was smuggled out in the janitor cart.',
+  },
+];
+
+// src/components/Header.jsx
+import React from 'react';
+import { motion as Motion } from 'framer-motion';
+
+export default function Header() {
+  return (
+    <Motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+      className="bg-white shadow-md rounded-b-2xl p-4 mb-6"
+    >
+      <h1 className="text-2xl font-bold text-center">Mystery Investigator</h1>
+    </Motion.div>
+  );
+}
+
+// src/components/CaseList.jsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { cases } from '../data/cases';
+
+export default function CaseList() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {cases.map((c) => (
+        <div key={c.id} className="bg-white p-4 rounded-2xl shadow-lg">
+          <Link to={`/case/${c.id}`} className="block hover:underline">
+            <h2 className="text-xl font-semibold mb-2">{c.title}</h2>
+            <p>{c.description}</p>
+          </Link>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// src/components/CaseDetail.jsx
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { cases } from '../data/cases';
+import ClueViewer from './ClueViewer';
+import SuspectCard from './SuspectCard';
+import ChatBox from './ChatBox';
+
+export default function CaseDetail() {
+  const { id } = useParams();
+  const current = cases.find((c) => c.id === id);
+
+  if (!current) return <p>Case not found.</p>;
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">{current.title}</h2>
+      <p>{current.description}</p>
+
+      <div>
+        <h3 className="text-xl font-semibold mb-2">Clues</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {current.clues.map((clue) => (
+            <ClueViewer key={clue.id} clue={clue} />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-semibold mb-2">Suspects</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {current.suspects.map((s) => (
+            <SuspectCard key={s.id} suspect={s} />
+          ))}
+        </div>
+      </div>
+
+      {/* Chat interface to ask questions about the case */}
+      <div>
+        <h3 className="text-xl font-semibold mb-2">Investigator Chat</h3>
+        <ChatBox caseData={current} />
+      </div>
+    </div>
+  );
+}
+
+// src/components/ClueViewer.jsx
+import React, { useState } from 'react';
+import { motion as Motion } from 'framer-motion';
+
+export default function ClueViewer({ clue }) {
+  const [zoom, setZoom] = useState(false);
+  return (
+    <Motion.div whileHover={{ scale: 1.05 }} className="relative cursor-pointer" onClick={() => setZoom(!zoom)}>
+      <img
+        src={clue.image}
+        alt={clue.title}
+        className={`rounded-2xl shadow-md transition-transform ${zoom ? 'scale-150 z-10' : ''}`}
+      />
+      <p className="mt-2 text-center font-medium">{clue.title}</p>
+    </Motion.div>
+  );
+}
+
+// src/components/SuspectCard.jsx
+import React from 'react';
+import { motion as Motion } from 'framer-motion';
+
+export default function SuspectCard({ suspect }) {
+  return (
+    <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+      <div className="bg-white p-4 rounded-2xl shadow">
+        <h4 className="text-lg font-semibold">{suspect.name}</h4>
+        <p className="italic">{suspect.role}</p>
+      </div>
+    </Motion.div>
+  );
+}
+
+// src/components/ChatBox.jsx
+import React, { useState } from 'react';
+
+export default function ChatBox({ caseData }) {
+  const [messages, setMessages] = useState([
+    { from: 'system', text: 'Ask any question about the case.' }
+  ]);
+  const [input, setInput] = useState('');
+
+  function handleSend() {
+    if (!input.trim()) return;
+    const userMsg = { from: 'user', text: input };
+    setMessages((msgs) => [...msgs, userMsg]);
+
+    // Simple stubbed response logic
+    let reply = "I'm not sure; look at the clues and suspects to find out!";
+    if (input.toLowerCase().includes('janitor')) {
+      reply = 'Morgan the janitor had the opportunity—check the fiber sample.';
+    } else if (input.toLowerCase().includes('solution')) {
+      reply = caseData.solution;
+    }
+    const sysMsg = { from: 'system', text: reply };
+    setMessages((msgs) => [...msgs, sysMsg]);
+    setInput('');
+  }
+
+  return (
+    <div className="border rounded-lg p-4 bg-white shadow">
+      <div className="h-40 overflow-y-auto mb-2 space-y-2">
+        {messages.map((m, i) => (
+          <div key={i} className={m.from === 'user' ? 'text-right' : 'text-left'}>
+            <span className={m.from === 'user' ? 'bg-blue-100 px-2 py-1 rounded' : 'bg-gray-100 px-2 py-1 rounded'}>
+              {m.text}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="flex space-x-2">
+        <input
+          className="flex-1 border rounded p-1" placeholder="Type your question..."
+          value={input} onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+        />
+        <button className="bg-blue-500 text-white px-3 rounded" onClick={handleSend}>
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}
