@@ -1,11 +1,8 @@
 {
   "name": "mystery-investigator",
-  "homepage": "https://<your-username>.github.io/mystery-investigator",
-  // …rest of package.json…}
-{
-  "name": "mystery-investigator",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://<your-username>.github.io/mystery-investigator",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
